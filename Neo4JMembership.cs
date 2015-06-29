@@ -1684,6 +1684,7 @@ namespace Nextwave.Neo4J.Membership
 
         private string EncodePassword(string password)
         {
+            password = string.IsNullOrEmpty(password) ? "placeholder" : password;
             string encodedPassword = password;
 
             switch (PasswordFormat)
