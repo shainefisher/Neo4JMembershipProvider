@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Configuration;
 using System.Collections.Specialized;
@@ -16,13 +16,12 @@ using WebMatrix.WebData;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using Neo4jClient;
-
 using Nextwave.Neo4J.Membership.Data;
+using Neo4jClient;
 
 namespace Nextwave.Neo4J.Membership
 {
-    public class Neo4JRolesProvider : RoleProvider
+    public class Neo4JRolesProvider : RoleProvider, IDisposable
     {
         private string applicationName;
         private GraphClient _neoClient = null;
@@ -165,7 +164,7 @@ namespace Nextwave.Neo4J.Membership
             List<string> userList = new List<string>();
             foreach (var u in userSearch)
             {
-                userList.Add(u.FirstOrDefault().Data.Username);
+                userList.Add(u.FirstOrDefault().Username);//<-- here
             }
 
             return userList.ToArray();
@@ -175,13 +174,13 @@ namespace Nextwave.Neo4J.Membership
         {
             var roleSearch = _neoClient.Cypher
                 .Match("(role:Role)")
-                .Return(roles => roles.CollectAs<Role>())
+                .Return(role => role.CollectAs<Role>())
                 .Results;
 
             List<string> roleList = new List<string>();
             foreach (var r in roleSearch)
             {
-                roleList.Add(r.FirstOrDefault().Data.RoleName);
+                roleList.Add(r.FirstOrDefault().RoleName);//<-- and here
             }
 
             return roleList.ToArray();
@@ -304,5 +303,21 @@ namespace Nextwave.Neo4J.Membership
 
             return configValue;
         }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources
+            }
+            // free native resources if there are any.
+
+        }
+
     }
 }
